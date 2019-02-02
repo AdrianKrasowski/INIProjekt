@@ -112,7 +112,17 @@ def ordered_crossover(janusz, grazyna):
         i += 1
 
     return karyna, seba
-
+def get_highest_makespan(etc):
+    machines_num = etc.shape[0]
+    tasks_num = etc.shape[1]
+    max_ms = 0
+    for x in range(machines_num):
+        current_ms = 0
+        for y in range(tasks_num):
+            current_ms += etc[y, x]
+        if current_ms >= max_ms:
+            max_ms = current_ms
+    return max_ms
 
 if __name__ == '__main__':
     try:
