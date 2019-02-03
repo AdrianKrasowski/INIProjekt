@@ -201,6 +201,23 @@ def get_highest_makespan(etc):
     return max_ms
 
 
+def get_highest_makespan_for_individual(etc, individual):
+    task_arr = #nie wiem jak wyciąnąc tablice z numerami zadan z osobnika
+    machine_arr = #podobnie nie wiem jak wyciągnąc tablice z ilością zadań na maszynie
+    offset = 0
+    max_makespan = 0
+    for m in range(machine_arr): #m to id maszyny
+        current_makespan = 0
+        num_of_tasks = machine_arr[m] #na pozycji m jest ilosc zadan
+        for t in range(num_of_tasks):
+            index = t + offset
+            current_makespan += etc[index][m] #dodajemy czas dla zadan dla maszyny m
+        if current_makespan > max_makespan:
+            max_makespan = current_makespan
+        offset = range(num_of_tasks) #offset aby brac dalsze elementy tablicy z zadaniami
+    return max_makespan
+
+
 if __name__ == '__main__':
     try:
 
@@ -212,7 +229,7 @@ if __name__ == '__main__':
             print(x)
         
         #crossover test;
-        x = generate_population(6, tasks, machines)
+        x = (6, tasks, machines)
         y = crossover(x)
         y = mutate_population(y)
         z = crossover(y)
