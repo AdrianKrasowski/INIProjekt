@@ -47,6 +47,78 @@ def generate_population(p, tasks, machines):
         population.append(tuple(generate_individual(tasks, number_of_machines)))
     return population
 
+def mutate_population(p):
+    for i in range(int(len(p))):       
+        if check_swap_mutation():
+            p[i] = swap_mutation(p[i]) 
+        if check_transposition_mutation():
+            p[i] = transposition_mutation(p[i])
+    return p
+        
+
+def check_swap_mutation():
+    random_value = np.random.uniform(0.0, 1.0)
+    pms =0.1
+    if random_value <=  pms:
+        return 1
+    else:
+        return 0
+
+def check_transposition_mutation():
+    random_value = np.random.uniform(0.0, 1.0)
+    pms =0.05
+    if random_value <=  pms:
+        return 1
+    else:
+        return 0
+
+def swap_mutation(individual):
+    number_of_tasks = len(individual[0]) -1
+    i = np.random.randint(0, number_of_tasks)
+    j = np.random.randint(0, number_of_tasks)
+    while i == j:
+        j = np.random.randint(0, number_of_tasks)
+    pom = individual[0][i]
+    individual[0][i] = individual[0][j]
+    individual[0][j] = pom
+    return individual
+  
+
+def transposition_mutation(individual):
+    number_of_tasks = len(individual[0]) -1
+    i = np.random.randint(0, number_of_tasks)
+    j = np.random.randint(0, number_of_tasks)
+    while i == j:
+            j = np.random.randint(0, number_of_tasks)     
+    
+    position_to_change = get_machine_number_for_task(individual,i)
+    if individual[1][position_to_change] <= 1:
+        return individual
+    destination_to_change = get_machine_number_for_task(individual,j)
+    individual[1][position_to_change] = individual[1][position_to_change] -1 
+    individual[1][destination_to_change] = individual[1][destination_to_change] + 1
+    if i<j:
+        traspositioned_number = individual[0][i]
+        for x in range(i,j):
+            individual[0][x] = individual[0][x+1]
+        individual[0][j] ==transpositioned_number  
+    else:
+        traspositioned_number = individual[0][j]
+        for x in reversed(range(j+1,i+1)):
+            individual[0][x] = individual[0][x-1]
+        individual[0][i] ==transpositioned_number
+    return individual  
+
+def get_machine_number_for_task(individual, task_position):
+    counter = 0
+    position_number = 0
+    for machine in individual[1]:
+        position_number += machine
+        if position_number >= task_position+1:
+            return counter
+        else:
+            counter = counter + 1
+    return null
 
 # krzyżowanie populacji
 def crossover(population):
@@ -136,10 +208,14 @@ if __name__ == '__main__':
         tasks = pd.read_csv("data/T-200.csv", skiprows=[0, 1], delimiter=";", index_col=[0], names=['id', 'WL'])
 
         etc = generate_etc_matrix(machines, tasks)
-        # crossover test;
-        # x = generate_population(6, tasks, machines)
-        # y = crossover(x)
-        # z = crossover(y)
+        for x in reversed(range(20+1,30+1)):
+            print(x)
+        
+        #crossover test;
+        x = generate_population(6, tasks, machines)
+        y = crossover(x)
+        y = mutate_population(y)
+        z = crossover(y)
         # test for individual
         # a = [4, 9, 2, 8, 3, 1, 5, 7, 6]
         # b = [6, 4, 1, 3, 7, 2, 8, 5, 9]
