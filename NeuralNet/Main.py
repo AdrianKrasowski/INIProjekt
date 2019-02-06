@@ -191,10 +191,12 @@ def ordered_crossover(dad, mom):
 
 
 def population_makespan(etc, population):
-    individual_makespan = []
+    individuals_makespan = []
     for i in range(len(population)):
-        individual_makespan.append(get_highest_makespan_for_individual(etc, population[i]))
-    return min(individual_makespan)
+        individuals_makespan.append(get_highest_makespan_for_individual(etc, population[i]))
+    min_population_makespan = min(individuals_makespan)
+    best_individual_from_population = population[individuals_makespan.index(min_population_makespan)]
+    return min_population_makespan, best_individual_from_population
 
 
 def get_highest_makespan_for_individual(etc, individual):
@@ -221,11 +223,15 @@ if __name__ == '__main__':
 
         etc = generate_etc_matrix(machines, tasks)
         population = generate_population(6, tasks, machines)
-        for i in range(10):
+        best_makespan = get_highest_makespan_for_individual(etc, population[0])  # makespan dla pierwszego osobnika
+        for i in range(100):
             population = crossover(population)
             # population = mutate_population(population)
             print(population)
-            print(population_makespan(etc, population))
+            current_makespan, best_individual = population_makespan(etc, population)
+            if best_makespan > current_makespan:
+                best_makespan = current_makespan
+                print("Current best makespan: " + str(best_makespan) + " for individual:" + str(best_individual))
 
         # test for individual
         # a = [4, 9, 2, 8, 3, 1, 5, 7, 6]
