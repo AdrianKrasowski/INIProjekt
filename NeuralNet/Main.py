@@ -100,15 +100,15 @@ def transposition_mutation(individual):
     individual[1][position_to_change] = individual[1][position_to_change] - 1
     individual[1][destination_to_change] = individual[1][destination_to_change] + 1
     if i < j:
-        traspositioned_number = individual[0][i]
+        transpositioned_number = individual[0][i]
         for x in range(i, j):
             individual[0][x] = individual[0][x + 1]
-        # individual[0][j] ==transpositioned_number
+        individual[0][j] = transpositioned_number
     else:
-        traspositioned_number = individual[0][j]
+        transpositioned_number = individual[0][j]
         for x in reversed(range(j + 1, i + 1)):
             individual[0][x] = individual[0][x - 1]
-        # individual[0][i] ==transpositioned_number
+        individual[0][i] = transpositioned_number
     return individual
 
 
@@ -226,7 +226,7 @@ if __name__ == '__main__':
         best_makespan = get_highest_makespan_for_individual(etc, population[0])  # makespan dla pierwszego osobnika
         for i in range(100):
             population = crossover(population)
-            # population = mutate_population(population)
+            population = mutate_population(population)
             print(population)
             current_makespan, best_individual = population_makespan(etc, population)
             if best_makespan > current_makespan:
