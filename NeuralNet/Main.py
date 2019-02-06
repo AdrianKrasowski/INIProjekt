@@ -23,57 +23,59 @@ def generate_etc_matrix(machines, tasks):
 
 
 # generowanie jednego osobnika
-def generate_individual(tasks, number_of_machines):
-    number_of_tasks = len(tasks)
+def generate_individual(number_of_tasks, number_of_machines):
     tasks_per_machine = math.floor(number_of_tasks / number_of_machines)
-
     # wypelnij macierz iloscia osobnikow na maszyne
     machines_chromosome = [tasks_per_machine] * number_of_machines
     # dodaj po jednym osobniku, jeśli ilość osobników na maszynę nie jest równa dla każdej maszyny
     for i in range(number_of_tasks - (tasks_per_machine * number_of_machines)):
         machines_chromosome[i] += 1
-    ret_tasks = shuffle(tasks.values)
+    ret_tasks = range(0, number_of_tasks)
     # osobnik jest reprezentowany przez krotkę:
     # 1. lista z kolejnymi zadaniami (numer zadania)
     # 2. lista z iloscia zadan na maszynę (kolejnosc w liscie - numer maszyny)
-    return [item for sublist in ret_tasks for item in sublist], shuffle(machines_chromosome)
+    return shuffle(ret_tasks), shuffle(machines_chromosome)
 
 
 # generowanie populacji
 def generate_population(p, tasks, machines):
     population = []
     number_of_machines = len(machines)
+    number_of_tasks = len(tasks)
     for i in range(p):
-        population.append(tuple(generate_individual(tasks, number_of_machines)))
+        population.append(tuple(generate_individual(number_of_tasks, number_of_machines)))
     return population
 
+
 def mutate_population(p):
-    for i in range(int(len(p))):       
+    for i in range(int(len(p))):
         if check_swap_mutation():
-            p[i] = swap_mutation(p[i]) 
+            p[i] = swap_mutation(p[i])
         if check_transposition_mutation():
             p[i] = transposition_mutation(p[i])
     return p
-        
+
 
 def check_swap_mutation():
     random_value = np.random.uniform(0.0, 1.0)
-    pms =0.1
-    if random_value <=  pms:
+    pms = 0.1
+    if random_value <= pms:
         return 1
     else:
         return 0
+
 
 def check_transposition_mutation():
     random_value = np.random.uniform(0.0, 1.0)
-    pms =0.05
-    if random_value <=  pms:
+    pms = 0.05
+    if random_value <= pms:
         return 1
     else:
         return 0
 
+
 def swap_mutation(individual):
-    number_of_tasks = len(individual[0]) -1
+    number_of_tasks = len(individual[0]) - 1
     i = np.random.randint(0, number_of_tasks)
     j = np.random.randint(0, number_of_tasks)
     while i == j:
@@ -82,43 +84,45 @@ def swap_mutation(individual):
     individual[0][i] = individual[0][j]
     individual[0][j] = pom
     return individual
-  
+
 
 def transposition_mutation(individual):
-    number_of_tasks = len(individual[0]) -1
+    number_of_tasks = len(individual[0]) - 1
     i = np.random.randint(0, number_of_tasks)
     j = np.random.randint(0, number_of_tasks)
     while i == j:
-            j = np.random.randint(0, number_of_tasks)     
-    
-    position_to_change = get_machine_number_for_task(individual,i)
+        j = np.random.randint(0, number_of_tasks)
+
+    position_to_change = get_machine_number_for_task(individual, i)
     if individual[1][position_to_change] <= 1:
         return individual
-    destination_to_change = get_machine_number_for_task(individual,j)
-    individual[1][position_to_change] = individual[1][position_to_change] -1 
+    destination_to_change = get_machine_number_for_task(individual, j)
+    individual[1][position_to_change] = individual[1][position_to_change] - 1
     individual[1][destination_to_change] = individual[1][destination_to_change] + 1
-    if i<j:
+    if i < j:
         traspositioned_number = individual[0][i]
-        for x in range(i,j):
-            individual[0][x] = individual[0][x+1]
-        individual[0][j] ==transpositioned_number  
+        for x in range(i, j):
+            individual[0][x] = individual[0][x + 1]
+        # individual[0][j] ==transpositioned_number
     else:
         traspositioned_number = individual[0][j]
-        for x in reversed(range(j+1,i+1)):
-            individual[0][x] = individual[0][x-1]
-        individual[0][i] ==transpositioned_number
-    return individual  
+        for x in reversed(range(j + 1, i + 1)):
+            individual[0][x] = individual[0][x - 1]
+        # individual[0][i] ==transpositioned_number
+    return individual
+
 
 def get_machine_number_for_task(individual, task_position):
     counter = 0
     position_number = 0
     for machine in individual[1]:
         position_number += machine
-        if position_number >= task_position+1:
+        if position_number >= task_position + 1:
             return counter
         else:
             counter = counter + 1
     return null
+
 
 # krzyżowanie populacji
 def crossover(population):
@@ -166,8 +170,7 @@ def ordered_crossover(dad, mom):
             continue
 
         # wypełniaj pozostałe fragmenty
-        test_daughter = daughter[i]
-        if test_daughter == -1:  # wymaga wypelnienia
+        if daughter[i] == -1:  # wymaga wypelnienia
             dad_trait = dad[current_dad_position]
             while dad_trait in daughter_inherited:
                 current_dad_position += 1
@@ -175,8 +178,7 @@ def ordered_crossover(dad, mom):
             daughter[i] = dad_trait
             daughter_inherited.append(dad_trait)
 
-        test_son = son[i]
-        if test_son == -1:  # wymaga wypelnienia
+        if son[i] == -1:  # wymaga wypelnienia
             mom_trait = mom[current_mom_position]
             while mom_trait in son_inherited:
                 current_mom_position += 1
@@ -188,33 +190,26 @@ def ordered_crossover(dad, mom):
     return daughter, son
 
 
-def get_highest_makespan(etc):
-    machines_num = etc.shape[0]
-    tasks_num = etc.shape[1]
-    max_ms = 0
-    for x in range(machines_num):
-        current_ms = 0
-        for y in range(tasks_num):
-            current_ms += etc[y, x]
-        if current_ms >= max_ms:
-            max_ms = current_ms
-    return max_ms
+def population_makespan(etc, population):
+    individual_makespan = []
+    for i in range(len(population)):
+        individual_makespan.append(get_highest_makespan_for_individual(etc, population[i]))
+    return min(individual_makespan)
 
 
 def get_highest_makespan_for_individual(etc, individual):
-    task_arr = #nie wiem jak wyciąnąc tablice z numerami zadan z osobnika
-    machine_arr = #podobnie nie wiem jak wyciągnąc tablice z ilością zadań na maszynie
+    tasks_arr, machine_arr = individual
     offset = 0
     max_makespan = 0
-    for m in range(machine_arr): #m to id maszyny
+    for m in range(len(machine_arr)):  # m to id maszyny
         current_makespan = 0
-        num_of_tasks = machine_arr[m] #na pozycji m jest ilosc zadan
+        num_of_tasks = machine_arr[m]  # na pozycji m jest ilosc zadan
         for t in range(num_of_tasks):
             index = t + offset
-            current_makespan += etc[index][m] #dodajemy czas dla zadan dla maszyny m
+            current_makespan += etc[tasks_arr[index]][m]  # dodajemy czas dla zadan dla maszyny m
         if current_makespan > max_makespan:
             max_makespan = current_makespan
-        offset = range(num_of_tasks) #offset aby brac dalsze elementy tablicy z zadaniami
+        offset += machine_arr[m]  # offset aby brac dalsze elementy tablicy z zadaniami
     return max_makespan
 
 
@@ -225,14 +220,13 @@ if __name__ == '__main__':
         tasks = pd.read_csv("data/T-200.csv", skiprows=[0, 1], delimiter=";", index_col=[0], names=['id', 'WL'])
 
         etc = generate_etc_matrix(machines, tasks)
-        for x in reversed(range(20+1,30+1)):
-            print(x)
-        
-        #crossover test;
-        x = (6, tasks, machines)
-        y = crossover(x)
-        y = mutate_population(y)
-        z = crossover(y)
+        population = generate_population(6, tasks, machines)
+        for i in range(10):
+            population = crossover(population)
+            # population = mutate_population(population)
+            print(population)
+            print(population_makespan(etc, population))
+
         # test for individual
         # a = [4, 9, 2, 8, 3, 1, 5, 7, 6]
         # b = [6, 4, 1, 3, 7, 2, 8, 5, 9]
