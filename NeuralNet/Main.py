@@ -48,9 +48,12 @@ def generate_population(p, tasks, machines):
 
 
 def mutate_population(p):
+    # dla każdego osobnika w populacji sprawdzamy czy zachodzi mutacja
     for i in range(int(len(p))):
+        # Sprawdzamy czy ma zajść mutacja typu swap
         if check_swap_mutation():
             p[i] = swap_mutation(p[i])
+        # sprawdzamy czy ma zajść mutacja typu transposition
         if check_transposition_mutation():
             p[i] = transposition_mutation(p[i])
     return p
@@ -75,6 +78,7 @@ def check_transposition_mutation():
 
 
 def swap_mutation(individual):
+    #Losowane są dwie liczby a następnie allele o odpowiadającyhc im numerach zostają ze sobą zamienione
     number_of_tasks = len(individual[0]) - 1
     i = np.random.randint(0, number_of_tasks)
     j = np.random.randint(0, number_of_tasks)
@@ -87,28 +91,36 @@ def swap_mutation(individual):
 
 
 def transposition_mutation(individual):
+    # print(individual)
+    #Losujemy dwie liczby
     number_of_tasks = len(individual[0]) - 1
     i = np.random.randint(0, number_of_tasks)
     j = np.random.randint(0, number_of_tasks)
     while i == j:
         j = np.random.randint(0, number_of_tasks)
-
+    #Sprawdzamy czy do jakich maszyn przypisane są wylosowane zadania
     position_to_change = get_machine_number_for_task(individual, i)
     if individual[1][position_to_change] <= 1:
         return individual
     destination_to_change = get_machine_number_for_task(individual, j)
+    #Odpowiednio modyfikujemy liczbę przypisanych wylosowanym maszynom zadań
     individual[1][position_to_change] = individual[1][position_to_change] - 1
     individual[1][destination_to_change] = individual[1][destination_to_change] + 1
+    #Zadanie zostaje przeniesione do odpowiedniej maszyny
+    #Zadanie przenoszone jest do dalszej maszyny
     if i < j:
         transpositioned_number = individual[0][i]
         for x in range(i, j):
             individual[0][x] = individual[0][x + 1]
         individual[0][j] = transpositioned_number
+    #Zadanie przenoszone jest dowcześniejszej maszyny
     else:
-        transpositioned_number = individual[0][j]
-        for x in reversed(range(j + 1, i + 1)):
+        transpositioned_number = individual[0][i]
+        # print(transpositioned_number)
+        for x in reversed(range(j+1, i + 1)):
             individual[0][x] = individual[0][x - 1]
-        individual[0][i] = transpositioned_number
+        individual[0][j] = transpositioned_number
+    # print(individual)
     return individual
 
 
@@ -227,16 +239,11 @@ if __name__ == '__main__':
         for i in range(100):
             population = crossover(population)
             population = mutate_population(population)
-            print(population)
+            # print(population)
             current_makespan, best_individual = population_makespan(etc, population)
             if best_makespan > current_makespan:
                 best_makespan = current_makespan
                 print("Current best makespan: " + str(best_makespan) + " for individual:" + str(best_individual))
-
-        # test for individual
-        # a = [4, 9, 2, 8, 3, 1, 5, 7, 6]
-        # b = [6, 4, 1, 3, 7, 2, 8, 5, 9]
-        # print(ordered_crossover(a, b))
 
     except KeyboardInterrupt:
         # niszczenie obiektow itp
