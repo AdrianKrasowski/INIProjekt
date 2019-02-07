@@ -61,7 +61,7 @@ def mutate_population(p):
 
 def check_swap_mutation():
     random_value = np.random.uniform(0.0, 1.0)
-    pms = 0.1
+    pms = 0.1 #prawdopodobieństwo mutacji swap
     if random_value <= pms:
         return 1
     else:
@@ -70,7 +70,7 @@ def check_swap_mutation():
 
 def check_transposition_mutation():
     random_value = np.random.uniform(0.0, 1.0)
-    pms = 0.05
+    pms = 0.05 #prawdopodobieństwo mutacji transposition
     if random_value <= pms:
         return 1
     else:
@@ -226,6 +226,8 @@ def get_highest_makespan_for_individual(etc, individual):
         offset += machine_arr[m]  # offset aby brac dalsze elementy tablicy z zadaniami
     return max_makespan
 
+def selection(p):
+    return p
 
 if __name__ == '__main__':
     try:
@@ -235,15 +237,19 @@ if __name__ == '__main__':
 
         etc = generate_etc_matrix(machines, tasks)
         population = generate_population(6, tasks, machines)
-        best_makespan = get_highest_makespan_for_individual(etc, population[0])  # makespan dla pierwszego osobnika
-        for i in range(100):
+        best_makespan, best_individual = population_makespan(etc, population)
+        print("Initial best makespan: " + str(best_makespan))
+        for i in range(10000):
+            population = selection(population)
             population = crossover(population)
             population = mutate_population(population)
             # print(population)
             current_makespan, best_individual = population_makespan(etc, population)
             if best_makespan > current_makespan:
                 best_makespan = current_makespan
-                print("Current best makespan: " + str(best_makespan) + " for individual:" + str(best_individual))
+                print("[",i+1,"] Current best makespan: " + str(best_makespan))
+
+        print("best makespan: " + str(best_makespan) + " for individual:" + str(best_individual))
 
     except KeyboardInterrupt:
         # niszczenie obiektow itp
